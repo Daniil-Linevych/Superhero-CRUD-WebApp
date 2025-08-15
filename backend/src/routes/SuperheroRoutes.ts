@@ -83,8 +83,8 @@ router.patch('/:id', async (req:Request, res:Response) => {
                 ...(catchPhrase !== undefined && { catchPhrase }),
                 ...(images !== undefined && { images })
             }
-        
-        if (await nicknameExists(superheroData.nickname)){
+
+        if (await nicknameExists(nickname, parseInt(id))){
             return res.status(400).json({error:"Nickname must be unique!"});
         } 
 
@@ -95,9 +95,10 @@ router.patch('/:id', async (req:Request, res:Response) => {
 
         res.status(201).json(updatedSuperhero);
     } catch(error){
+        console.log("Failed update superhero: ", error);
         res.status(500).json({
             error:"Failed update superhero!"
-        })
+        });
     }
 })
 
@@ -120,9 +121,9 @@ router.delete('/:id', async (req:Request, res:Response) => {
     }
 })
 
-async function nicknameExists(nickname:string):Promise<boolean>{
+async function nicknameExists(nickname:string,  excludeId?: number):Promise<boolean>{
     const superhero = await prisma.superhero.findFirst({
-        where: {nickname:nickname}
+        where: {nickname:nickname, ...(excludeId && {NOT:{id:excludeId}})}
     })
 
     return !!superhero
