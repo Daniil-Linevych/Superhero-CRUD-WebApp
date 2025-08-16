@@ -1,6 +1,7 @@
 import express, {Express, Request, Response} from "express"
 import "dotenv/config"
 import superheroRoutes from "./routes/SuperheroRoutes"
+import {ensureUploadsDirectoryExists} from "./services/upload.service"
 import {connectDb} from './db/db'
 
 const PORT = process.env.PORT || 3000;
@@ -23,9 +24,14 @@ app.use((err: any, req: Request, res: Response, next: Function) => {
     });
 });
 
-connectDb().then(()=>{
-   app.listen(PORT, () => {
-    console.log("Server is listening on port " + PORT + " ...");
-   }) 
-})
+const startSever = async () => {
+    await connectDb()
+    ensureUploadsDirectoryExists()
+
+    app.listen(PORT, () => {
+        console.log("Server is listening on port " + PORT + " ...");
+    }) 
+}
+
+startSever();
 

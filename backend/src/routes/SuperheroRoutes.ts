@@ -1,6 +1,10 @@
 import {Router, Request, Response} from "express"
 import {prisma} from "../db/db"
 import {SuperheroData} from "../types/superhero"
+import {validateCreateSuperhero, validateUpdateSuperhero} from "./../middlewares/validateSuperhero"
+import {checkNicknameUnique} from "../middlewares/checkNicknameUnique"
+import {validateFileUpload} from "../middlewares/validateFilesUpload"
+import { upload } from "../services/storage.service"
 
 const router:Router = Router();
 
@@ -20,14 +24,10 @@ router.get('/', async (req: Request, res:Response) => {
 
 router.get('/:id', async (req: Request, res:Response) => {
     try{
-        const {id} = req.params;
-
-        if (!id){
-            return res.status(400).json({error:"ID is required!"});
-        }
+        const superheroId = Number(req.params.id!);
 
         const superhero = await prisma.superhero.findUnique({
-            where: {id: parseInt(id)}
+            where: {id: superheroId}
         });
 
         if (!superhero){
@@ -42,18 +42,9 @@ router.get('/:id', async (req: Request, res:Response) => {
     }
 })
 
-router.post('/', async (req:Request, res:Response) => {
+router.post('/', validateCreateSuperhero, checkNicknameUnique, async (req:Request, res:Response) => {
     try{
-        const { nickname, realName, originDescription, superpowers, catchPhrase, images } = req.body;
-        const superheroData: SuperheroData = { nickname, realName, originDescription, superpowers, catchPhrase, images };
-
-        if (!nickname || !realName ){
-            return res.status(400).json({error:"Nickname and Real Name are required!"});
-        }
-
-        if (await nicknameExists(superheroData.nickname)){
-            return res.status(400).json({error:"Nickname must be unique!"});
-        } 
+        const superheroData: SuperheroData = req.body;
 
         const superhero = await prisma.superhero.create({
             data: superheroData
@@ -67,29 +58,14 @@ router.post('/', async (req:Request, res:Response) => {
     }
 })
 
-router.patch('/:id', async (req:Request, res:Response) => {
+router.patch('/:id', validateUpdateSuperhero, checkNicknameUnique, async (req:Request, res:Response) => {
     try{
-        const {id} = req.params;
-        if (!id){
-            return res.status(400).json({error:"ID is required!"});
-        }
+        const superheroId = Number(req.params.id!);
 
-        const { nickname, realName, originDescription, superpowers, catchPhrase, images } = req.body;
-        const superheroData: SuperheroData = {
-                ...(nickname && { nickname }),
-                ...(realName && { realName }),
-                ...(originDescription !== undefined && { originDescription }),
-                ...(superpowers !== undefined && { superpowers }),
-                ...(catchPhrase !== undefined && { catchPhrase }),
-                ...(images !== undefined && { images })
-            }
-
-        if (await nicknameExists(nickname, parseInt(id))){
-            return res.status(400).json({error:"Nickname must be unique!"});
-        } 
+        const superheroData: Partial<SuperheroData> = req.body; 
 
         const updatedSuperhero = await prisma.superhero.update({
-            where: {id:parseInt(id)},
+            where: {id:superheroId},
             data: superheroData
         });
 
@@ -104,13 +80,10 @@ router.patch('/:id', async (req:Request, res:Response) => {
 
 router.delete('/:id', async (req:Request, res:Response) => {
     try{
-        const { id } = req.params;
-        if (!id){
-            return res.status(400).json({error:"ID is required!"});
-        }
+        const superheroId = Number(req.params.id!);
         
         await prisma.superhero.delete({
-            where: { id: parseInt(id) }
+            where: { id: superheroId }
         });
         
         res.status(200).json({ message: "Superhero deleted successfully" });
@@ -121,12 +94,31 @@ router.delete('/:id', async (req:Request, res:Response) => {
     }
 })
 
-async function nicknameExists(nickname:string,  excludeId?: number):Promise<boolean>{
-    const superhero = await prisma.superhero.findFirst({
-        where: {nickname:nickname, ...(excludeId && {NOT:{id:excludeId}})}
-    })
+router.post('/:id/upload',  upload.array('images', parseInt(process.env.MAX_UPLOAD_FILES || '5')), validateFileUpload, async (req:Request, res:Response) => {
+    try{
+        const superheroId = Number(req.params.id);
 
-    return !!superhero
-}
+        const files = req.files as Express.Multer.File[];
+        const filePaths = files.map(file => file.path);
+
+        const updatedSuperhero = await prisma.superhero.update({
+            where: {id: superheroId},
+            data: {
+                images: {push: filePaths}
+            }
+        })
+
+        res.status(200).json({
+            message:"Files uploaded successfully!",
+            files: filePaths,
+            superhero: updatedSuperhero,
+        })
+
+    } catch(error){
+        console.error('File upload error:', error);
+        res.status(500).json({ error: 'Failed to upload files' });
+    }
+})
+
 
 export default router;
