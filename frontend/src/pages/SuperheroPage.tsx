@@ -37,7 +37,6 @@ const SuperheroPage = () => {
     axios.get(`${API_BASE_URL}/superheroes/${id}`).then( res => {
         setHero(res.data)
         setLoading(false)
-        console.log(res.data)  
   }).catch((err)=>{
     console.log(err)
     setError(err)

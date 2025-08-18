@@ -6,7 +6,6 @@ interface CarouselProps {
 }
 
 const processImgUrl = (img:string) => {
-    console.log(API_BASE_URL + img)
     return API_BASE_URL + '/uploads/' + img;
 }
 
@@ -44,7 +43,6 @@ const Carousel = ({ images }: CarouselProps) => {
               src={processImgUrl(img)}
               alt={`Image ${i + 1}`}
               className="object-contain w-full h-96 rounded-xl"
-              onLoad={() => console.log("Loaded", img)}
               onError={(e) => console.error("Failed:", e.currentTarget.src)}
             />
           </div>
