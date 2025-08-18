@@ -62,7 +62,7 @@ They should also work on Linux/Mac, but paths or environment setup may differ sl
 ## Assumptions
  - Each superhero must have a unique nickname.
  - Images are stored locally in the backend uploads/ folder.
- - Validation only on backend
+
 
 ## Limitations / Known Issues
 - No advanced **frontend validation** was implemented due to deadline constraints.  
