@@ -16,7 +16,6 @@ JSNinja Test Task.
 ## Technical Requirements
 
 **List the technical requirements:**
-  - OS: Windows
   - Framework: Node.js + Express / React   
   - Database: PostgreSQL   
 
