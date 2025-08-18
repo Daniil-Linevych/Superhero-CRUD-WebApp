@@ -34,29 +34,31 @@ They should also work on Linux/Mac, but paths or environment setup may differ sl
 2. **Navigate to the project folder**
     - cd Superhero-CRUD-WebApp
 3. **Create PostgreSQL database**
-4. **Set up environment variables for backend**
+4. **Navigate to the backend and set up environment variables**
+    - navigate to backend folder
     - Create .env file
     - Copy .env.example to .env
     - Fill in your DB connection (change username, userpass, db)
-5. **Navigate to the backend and Install dependencies**
+6. **Install dependencies**
     - cd backend
     - npm install
     - npx prisma generate
     - npx prisma migrate dev
-6. **Navigate to the frontend and Install dependencies**
+7. **Navigate to the frontend and Install dependencies**
     - cd frontend
     - npm install
-7. **Run the backend**
+8. **Run the backend**
     - cd backend
     - npm run dev
-8. **Run the frontend**
+9. **Run the frontend**
+    - run new terminal
     - cd frontend
     - npm run dev
 
 ## Usage
 
  - Backend runs on: http://localhost:3000
- - Frontend runs on: http://localhost:5173
+ - Frontend runs on: http://localhost:5173 (use frontend)
 
 ## Assumptions
  - Each superhero must have a unique nickname.
