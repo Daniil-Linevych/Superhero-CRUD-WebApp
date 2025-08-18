@@ -94,24 +94,18 @@ router.delete('/:id', async (req:Request, res:Response) => {
     }
 })
 
-router.post('/:id/upload',  upload.array('images', parseInt(process.env.MAX_UPLOAD_FILES || '5')), validateFileUpload, async (req:Request, res:Response) => {
+router.post('/upload',  upload.array('images', parseInt(process.env.MAX_UPLOAD_FILES || '5')), validateFileUpload, async (req:Request, res:Response) => {
     try{
-        const superheroId = Number(req.params.id);
-
         const files = req.files as Express.Multer.File[];
-        const filePaths = files.map(file => file.path);
-
-        const updatedSuperhero = await prisma.superhero.update({
-            where: {id: superheroId},
-            data: {
-                images: {push: filePaths}
-            }
-        })
+        const filePaths = files.map(file => {
+            const fileParts = file.path.split('\\')
+            const filename = fileParts[fileParts.length-1]
+            return filename as string
+        });
 
         res.status(200).json({
             message:"Files uploaded successfully!",
             files: filePaths,
-            superhero: updatedSuperhero,
         })
 
     } catch(error){

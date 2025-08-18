@@ -3,16 +3,21 @@ import "dotenv/config"
 import superheroRoutes from "./routes/SuperheroRoutes"
 import {ensureUploadsDirectoryExists} from "./services/upload.service"
 import {connectDb} from './db/db'
+import path from "path"
+import cors from "cors"
 
 const PORT = process.env.PORT || 3000;
 
 const app:Express = express();
 
 app.use(express.json());
+app.use(cors())
 
 app.get('/', async (req: Request, res: Response) => {
     res.status(200).json({"message":"Backend replies!"});
 })
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.use('/superheroes', superheroRoutes)
 

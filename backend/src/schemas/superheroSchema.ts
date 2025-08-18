@@ -8,7 +8,7 @@ const superheroBaseSchema = z.object({
   originDescription: z.string().optional(),
   superpowers: z.string().optional(),
   catchPhrase: z.string().optional(),
-  images: z.array(z.string().url("Each image must be a valid URL")).optional()
+  images: z.array(z.string()).optional()
 });
 
 const superheroCreateSchema = superheroBaseSchema;
